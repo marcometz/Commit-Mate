@@ -17,30 +17,36 @@ require("dotenv/config");
 const gtpClient_1 = require("./clients/gtpClient");
 const gitClient_1 = require("./clients/gitClient");
 const enquirer_1 = __importDefault(require("enquirer"));
-const CANCEL = '--Cancel--';
+const CANCEL = '# Cancel';
+const ACCEPT = '# OK';
 const exec = () => __awaiter(void 0, void 0, void 0, function* () {
     const gtpClient = new gtpClient_1.GptClient(apiKey);
     const gitClient = new gitClient_1.GitClient();
+    const jira_ticket = yield gitClient.getJiraTicket();
     const { error, changes } = gitClient.getDiff();
     if (error) {
         console.log(error);
     }
     else {
-        const choices = yield gtpClient.getMessages(changes !== null && changes !== void 0 ? changes : '');
+        var commitMessage = yield gtpClient.getMessages(changes !== null && changes !== void 0 ? changes : '');
+        commitMessage = commitMessage + `\n\n${jira_ticket}`;
+        const choices = [];
         choices.push(CANCEL);
+        choices.push(ACCEPT);
         try {
+            console.log(commitMessage);
             const answer = yield enquirer_1.default.prompt({
                 type: 'select',
                 name: 'message',
-                message: 'Pick a message',
-                choices,
+                message: 'Create a Commit?',
+                choices
             });
             const { message } = answer;
             if (message === CANCEL) {
                 console.log('Operation cancelled');
             }
             else {
-                const { error, response } = gitClient.commit(message);
+                const { error, response } = gitClient.commit(commitMessage);
                 console.log(response || error);
             }
         }

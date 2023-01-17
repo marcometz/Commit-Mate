@@ -4,6 +4,10 @@ const GIT_DIFF_COMMAND = 'git diff --cached';
 const GIT_COMMIT_COMMAND = 'git commit -m';
 
 export class GitClient {
+  getJiraTicket(): string {
+    const branch_name = execSync('git rev-parse --abbrev-ref HEAD').toString();
+    return branch_name.split(/\//)[1];
+  }
   getDiff(): Diffs {
     try {
       const filesChanged = execSync(GIT_DIFF_COMMAND).toString();

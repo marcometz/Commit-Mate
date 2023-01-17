@@ -4,34 +4,40 @@ import 'dotenv/config';
 import { GptClient } from './clients/gtpClient';
 import { GitClient } from './clients/gitClient';
 import enquirer from 'enquirer';
-const CANCEL = '--Cancel--';
+const CANCEL = '# Cancel';
+const ACCEPT = '# OK';
 const exec = async () => {
   const gtpClient = new GptClient(apiKey);
   const gitClient = new GitClient();
+  const jira_ticket = await gitClient.getJiraTicket();
 
   const { error, changes } = gitClient.getDiff();
   if (error) {
     console.log(error);
   } else {
-    const choices = await gtpClient.getMessages(changes ?? '');
+    var commitMessage = await gtpClient.getMessages(changes ?? '');
+    commitMessage = commitMessage + `\n\n${jira_ticket}`;
+    const choices = [];
     choices.push(CANCEL);
+    choices.push(ACCEPT);
     try {
+      console.log(commitMessage);
       const answer = await enquirer.prompt<{ message: string }>({
         type: 'select',
         name: 'message',
-        message: 'Pick a message',
-        choices,
+        message: 'Create a Commit?',
+        choices
       });
       const { message } = answer;
       if (message === CANCEL) {
         console.log('Operation cancelled');
       } else {
-        const { error, response } = gitClient.commit(message);
+        const { error, response } = gitClient.commit(commitMessage);
         console.log(response || error);
       }
     } catch (error) {
       console.log(error);
-      
+
     }
   }
 };
