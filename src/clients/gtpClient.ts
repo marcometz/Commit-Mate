@@ -9,7 +9,7 @@ export class GptClient{
     this.openai = new OpenAIApi(configuration);
   }
   async getMessages(filesChanged: string) {
-    const prompt = `generate five git commit messages based on the following files that changed: ${filesChanged}`
+    const prompt = `erzeuge 3 git commit messages basierend auf den folgenden Veränderungen inklusive einer Überschrift und einer kurzen Beschreibung: ${filesChanged}`
     try {
       const response = await this.openai.createCompletion({
         model: "text-davinci-003",
@@ -22,7 +22,7 @@ export class GptClient{
       });
       return response.data.choices[0].text.split(/\r?\n/).filter((t: string) => t?.length);
       // console.log();
-      
+
     } catch (error: any) {
       if (error.response) {
         console.log(error.response.status);

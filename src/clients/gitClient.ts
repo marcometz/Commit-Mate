@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { Diffs, Commit } from '../type/git';
-const GIT_DIFF_COMMAND = 'git diff --name-only --cached';
+const GIT_DIFF_COMMAND = 'git diff --cached';
 const GIT_COMMIT_COMMAND = 'git commit -m';
 
 export class GitClient {
